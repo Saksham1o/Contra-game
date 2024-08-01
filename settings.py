@@ -1,0 +1,14 @@
+import os
+import pygame
+
+# colors
+WHITE = (255,255,255)
+BLACK = (0,0,0)
+RED = (255,0,0)
+GREEN = (0,255,0)
+DARK_GREEN = (2,207,16)
+BLUE = (0,0,255)
+SEA_BLUE = (0,86,255)
+LIGHT_YELLOW = (255,251,168)
+YELLOW = (255,255,0)
+DARK_YELLOW = (255,150,2)
