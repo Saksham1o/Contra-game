@@ -175,3 +175,126 @@ class Player(pygame.sprite.Sprite):
 			self.blinkRetract = BLINK_RETRACT
 			dash_sound.play()
 			self.blinking = True
+			
+    def stopJumping(self):
+		self.jumpIndex = 0
+		self.jumping = False
+
+	def animate(self,frames,index,width,height,flip = False):
+		self.animCounter -= 1
+		if self.animCounter == 0:
+			index +=1
+			#print(index)
+			index %= len(frames)
+			if not flip:
+				self.image = pygame.transform.scale(frames[index],(width,height))
+			else:
+				self.image = pygame.transform.flip(pygame.transform.scale(frames[index],(width,height)),True,False)
+			self.animCounter = ANIM_SPEED
+		rx = self.rect.left
+		ry = self.rect.top
+		self.rect = self.image.get_rect()
+		self.rect.left = rx
+		self.rect.top = ry
+		return index
+	def drop(self):
+		if self.canMove:
+			self.collisions = False
+
+	def shoot(self,mousePos):
+		self.calcState()
+		if self.state == RIGHT:
+			speedx,speedy = 1,0
+			pass
+		elif self.state == LEFT:
+			speedx,speedy = -1,0
+			pass
+		elif self.state == RIGHT_UP:
+			speedx,speedy = 1,1
+			pass
+		elif self.state == RIGHT_DOWN:
+			speedx,speedy = 1,-1
+			pass
+		elif self.state == LEFT_UP:
+			speedx,speedy = -1,1
+			pass
+		elif self.state == LEFT_DOWN:
+			speedx,speedy = -1,-1
+			pass
+		shoot_sound.play()
+		b = Bullet(PLAYER_POSX,self.pos.y,speedx,speedy)
+		return b
+
+
+
+	def calcState(self):
+		mouseX,mouseY = pygame.mouse.get_pos()
+
+		if mouseY > self.pos.y + BULLET_THRESHOLD:
+			self.up = True
+			self.down = False
+		elif mouseY < self.pos.y - BULLET_THRESHOLD:
+			self.up = False
+			self.down = True
+		else:
+			self.up = False
+			self.down = False
+
+		if self.facing == 1:
+			if self.up:
+				self.state = RIGHT_UP
+			elif self.down:
+				self.state = RIGHT_DOWN
+			else:
+				self.state = RIGHT
+		else:
+			if self.up:
+				self.state = LEFT_UP
+			elif self.down:
+				self.state = LEFT_DOWN
+			else:
+				self.state = LEFT
+		
+	def setImageByState(self):
+		if self.state == RIGHT and not self.isMoving():
+			self.image = pygame.transform.scale(PLAYER_RIGHT_0,(PLAYER_WIDTH,PLAYER_HEIGHT))
+
+		self.rect = self.image.get_rect()
+		self.rect.left = PLAYER_POSX
+
+	def die(self):
+		print("DEAD")
+		self.dead = True
+		self.health = PLAYER_HEALTH
+
+
+# Enemies
+
+class Sniper(pygame.sprite.Sprite):
+	def __init__(self,x,y):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.Surface((PLAYER_WIDTH,PLAYER_HEIGHT))
+		self.rect = self.image.get_rect()
+		self.rect.center = (x,y)
+		self.up = False
+		self.down = False
+		self.speedy = 0 
+		self.defaultx = x
+		self.defaulty = y
+		self.counter = 60
+		self.state = LEFT
+
+
+
+	def update(self):
+		# Update sprite image based on state 
+		if self.state == LEFT:
+			self.image = pygame.transform.scale(SNIPER_LEFT,(PLAYER_WIDTH,PLAYER_HEIGHT))
+		elif self.state == LEFT_UP:
+			self.image = pygame.transform.scale(SNIPER_LEFT_UP,(PLAYER_WIDTH,PLAYER_HEIGHT))
+		else:
+			self.image = pygame.transform.scale(SNIPER_LEFT_DOWN,(PLAYER_WIDTH,PLAYER_HEIGHT))
+		self.image.set_colorkey(YELLOW)
+		self.rect.x = self.defaultx + camera.pos.x
+		self.rect.y = self.defaulty + camera.pos.y
+		pass
