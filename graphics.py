@@ -116,3 +116,15 @@ EXPLOSION_1 = explosion_sheet.get_image(31,0,31,30).convert()
 EXPLOSION_2 = explosion_sheet.get_image(62,0,31,30).convert()
 EXPLOSION_3 = explosion_sheet.get_image(93,0,31,30).convert()
 EXPLOSION_4 = explosion_sheet.get_image(124,0,31,30).convert()
+
+
+# Sounds
+
+shoot_sound = pygame.mixer.Sound(os.path.join(soundFolder,'Shoot.wav'))
+powerup_sound = pygame.mixer.Sound(os.path.join(soundFolder,'Powerup.wav'))
+explosion_sound = pygame.mixer.Sound(os.path.join(soundFolder,'Explosion.wav'))
+hit_sound = pygame.mixer.Sound(os.path.join(soundFolder, 'Hit.wav'))
+jump_sound = pygame.mixer.Sound(os.path.join(soundFolder, 'Jump.wav'))
+dash_sound = pygame.mixer.Sound(os.path.join(soundFolder, 'Dash.wav'))
+pygame.mixer.music.load(os.path.join(soundFolder,'Contra.wav'))
+pygame.mixer.music.set_volume(1)

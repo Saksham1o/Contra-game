@@ -74,8 +74,8 @@ class Player(pygame.sprite.Sprite):
 
 		self.deadFrames = [PLAYER_DEAD_0,PLAYER_DEAD_1,PLAYER_DEAD_2,PLAYER_DEAD_3,PLAYER_DEAD_4]
 		self.deadIndex = 0
-		
-    def update(self):
+
+	def update(self):
 		self.calcState()
 		if self.dead:
 			self.kill()
@@ -158,25 +158,25 @@ class Player(pygame.sprite.Sprite):
 				self.pos.x -= 1
 		self.rect.bottom = self.pos.y
 		self.image.set_colorkey(YELLOW)
-		
-    def isMoving(self):
+	def isMoving(self):
 		if int(self.vel.x):
 			return True
 		return False
 
-    def jump(self):
+	def jump(self):
+
 		if self.canMove and self.canJump and self.vel.y == 0:
 			self.vel.y = -JUMP_HEIGHT
 			self.jumping = True
 			self.canJump = False
 
-    def blink(self):
+	def blink(self):
 		if self.canMove and self.blinkRetract == 0:
 			self.blinkRetract = BLINK_RETRACT
 			dash_sound.play()
 			self.blinking = True
-			
-    def stopJumping(self):
+
+	def stopJumping(self):
 		self.jumpIndex = 0
 		self.jumping = False
 
@@ -298,9 +298,8 @@ class Sniper(pygame.sprite.Sprite):
 		self.rect.x = self.defaultx + camera.pos.x
 		self.rect.y = self.defaulty + camera.pos.y
 		pass
-	
 
-    def shoot_towards(self,player):
+	def shoot_towards(self,player):
 		#print(str(player.rect.bottom)+","+str(self.rect.bottom))
 		if player.rect.top < self.rect.top :
 			self.down = True
@@ -408,7 +407,7 @@ class Bullet(pygame.sprite.Sprite):
 		self.rect.top += self.speedy*BULLET_SPEED
 		if self.rect.right < 0 or self.rect.left > WIDTH:
 			self.kill()
-	
+
 
 # Platform
 

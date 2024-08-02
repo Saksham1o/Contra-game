@@ -47,11 +47,10 @@ class Game:
 		self.powerupTimer = POWERUP_TIME
 		self.blinkRetract = BLINK_RETRACT
 		self.time = 0
-		
+
 	def new(self):
 		self.reinit()
 		self.run()
-    
 
 	def run(self):
 		self.playing = True
@@ -115,8 +114,8 @@ class Game:
 				p.die()
 				self.deathAnim(p)
 				self.playing = False
-				
-        # or enemy
+
+		# or enemy
 		h1 = pygame.sprite.spritecollide(p,g.snipers,False)
 		if h1:
 			p.die()
@@ -132,6 +131,7 @@ class Game:
 			p.die()
 			self.deathAnim(p)
 			self.playing = False
+
 
 		# Sniper events
 		for e in self.snipers:
@@ -222,3 +222,115 @@ class Game:
 		self.death_anims.draw(self.screen)
 		pygame.display.update()
 
+	def draw_text(self, text, size, x, y):
+		font_name = pygame.font.match_font('Times')
+		font = pygame.font.Font(font_name, size)
+		text_surface = font.render(text,True, RED)
+		text_rect = text_surface.get_rect()
+		text_rect.center = (x,y)
+		self.screen.blit(text_surface,text_rect)
+		pygame.display.update()
+
+	def show_start_screen(self):
+		
+		
+		waiting_for_start = True
+		while waiting_for_start:
+			self.screen.blit(ss_background,ss_background.get_rect())
+			pygame.display.update()
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					waiting_for_start = False
+					pygame.quit()
+					quit()
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_SPACE:
+						waiting_for_start = False
+
+	def show_game_over_screen(self):
+		text_to_display = "Game Over"
+		if not self.bosses:
+			text_to_display = "STAGE CLEAR ("+str(int(self.time/FPS))+" s)"
+		pygame.draw.rect(self.screen,WHITE,(WIDTH/2, HEIGHT/2 - 35, 200,50))
+		self.draw_text(text_to_display, 21, WIDTH/2 + 100, HEIGHT/2 - 20)
+		self.draw_text("R to restart, Q to quit", 21,WIDTH/2 + 100, HEIGHT/ 2)
+
+# init game
+g = Game()
+
+
+g.show_start_screen()
+
+
+g.running = True
+while g.running:
+	pygame.mixer.music.play(loops = -1)
+	# init player
+	p = Player(g)
+	g.reinit()
+	g.player_sprite.add(p)
+	g.all_sprites.add(p)
+
+
+	# init level
+	for ground in LEVEL_1:
+		gs = Ground(*ground)
+		g.all_sprites.add(gs)
+		g.grounds.add(gs)
+
+	# init level background based on level
+	bg = Background(l1_bg)
+	g.bg_sprite.add(bg)
+	g.all_sprites.add(bg)
+
+	# init snipers
+	for s in LEVEL_1_SNIPERS:
+		sn = Sniper(*s)
+		g.snipers.add(sn)
+		g.all_sprites.add(sn)
+
+	# init soldiers
+	for sol in LEVEL_1_SOLDIERS:
+		s = Soldier(*sol)
+		g.soldiers.add(s)
+		g.all_sprites.add(s)
+
+	# init tanks
+	for t in LEVEL_1_TANKS:
+		tank = Tank(*t)
+		g.tanks.add(tank)
+		g.all_sprites.add(tank)
+
+	for po in LEVEL_1_PUPS:
+		pup = Powerup(*po)
+		g.powerups.add(pup)
+		g.all_sprites.add(pup)
+
+	# Boss
+	for boss in LEVEL_1_BOSSES:
+		b = Tank(*boss)
+		g.bosses.add(b)
+		g.tanks.add(b)
+		g.all_sprites.add(b)
+
+	# HUD
+	h = HUD()
+	g.player_sprite.add(h)
+	g.all_sprites.add(h)
+	# Start a new game
+	g.run()
+	g.show_game_over_screen()
+	waiting_for_quit_or_restart = True
+	while waiting_for_quit_or_restart:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				waiting_for_quit_or_restart = False
+				g.running = False
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_q:
+					waiting_for_quit_or_restart = False
+					g.running = False
+				if event.key == pygame.K_r:
+					waiting_for_quit_or_restart = False
+
+pygame.quit()
