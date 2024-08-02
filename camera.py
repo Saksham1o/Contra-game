@@ -1,18 +1,20 @@
-# sprites of the game
-
+# Camera sprite
 import pygame
-from camera import *
 from settings import *
-from graphics import *
 vec = pygame.math.Vector2
 
-
-all_sprites = pygame.sprite.Group()
-
-# Player States
-RIGHT = 0
-LEFT = 1
-RIGHT_DOWN = 2
-RIGHT_UP = 3
-LEFT_UP = 4
-LEFT_DOWN = 5
+class Camera(object):
+    def __init__(self, width, height):
+    	self.pos = vec(0,0)
+    def update(self,sprite):
+    	if sprite.canMove:
+    		self.pos.x = -sprite.pos.x
+    	if self.pos.x >= LEFT_BOUND:
+    		self.pos.x = LEFT_BOUND
+    	elif self.pos.x <= RIGHT_BOUND:
+    		self.pos.x = RIGHT_BOUND
+    	#self.pos.y = min(-sprite.pos.y+HEIGHT/2,0)
+    	#print(self.pos.x)
+   
+camera = Camera(WIDTH,HEIGHT)
+        
