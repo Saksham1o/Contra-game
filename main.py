@@ -48,9 +48,10 @@ class Game:
 		self.blinkRetract = BLINK_RETRACT
 		self.time = 0
 		
-    def new(self):
+	def new(self):
 		self.reinit()
 		self.run()
+    
 
 	def run(self):
 		self.playing = True
@@ -131,3 +132,93 @@ class Game:
 			p.die()
 			self.deathAnim(p)
 			self.playing = False
+
+		# Sniper events
+		for e in self.snipers:
+			b = e.shoot_towards(p)
+			if b:
+				self.enemy_bullets.add(b)
+				self.all_sprites.add(b)
+
+		# Tank Events
+		for t in self.tanks:
+			b = t.shoot()
+			if b:
+				self.enemy_bullets.add(b)
+				self.all_sprites.add(b)
+		# Do not jump up a platform if the full body is not yet above the platform
+		hits = pygame.sprite.spritecollide(p,g.grounds,False)
+		if hits and p.collisions and p.vel.y <= 0:
+			p.collisions = False
+
+		# Enable collisions when body out of ground
+		if not hits and not p.collisions:
+			p.collisions = True
+
+		# Jump on platform only while falling
+		if p.vel.y > 0 and p.collisions:
+			if hits:
+				p.pos.y = hits[0].defaulty 
+				p.stopJumping()
+				p.vel.y = 0
+				p.canJump = True
+		for e in self.soldiers:
+			hits = pygame.sprite.spritecollide(e,g.grounds,False)
+			if hits :
+				e.pos.y = hits[0].defaulty
+				e.vel.y = 0
+
+		# Powerup events
+		hits = pygame.sprite.spritecollide(p,g.powerups,False)
+		if hits:
+			powerup = hits[0]
+			action = powerup.powerup()
+			powerup_sound.play()
+			if action == 0:
+				p.blinkRetract = 0
+				self. blinkRetract = 0
+			elif action == 1:
+				p.health += 1
+				self.health += 1
+			else:
+				p.drop()
+			powerup.kill()
+
+	def events(self):
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				if self.playing:
+					self.playing = False
+				self.running = False
+				pygame.quit()
+				quit()
+			if event.type == pygame.KEYDOWN:
+				if not p.dead:
+					if event.key == pygame.K_SPACE:
+						jump_sound.play()
+						p.jump()
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				if event.button == 1:
+					if not p.dead:
+						b = p.shoot(pygame.mouse.get_pos())
+						self.all_sprites.add(b)
+						self.bullets.add(b)
+
+
+	def draw(self):
+		# Draw sprites and background on the screen
+		self.screen.fill(GREEN)
+		self.grounds.draw(self.screen)
+		self.bg_sprite.draw(self.screen)
+		self.player_sprite.draw(self.screen)
+		self.snipers.draw(self.screen)
+		self.soldiers.draw(self.screen)
+		self.enemy_bullets.draw(self.screen)
+		self.bullets.draw(self.screen)
+		self.tanks.draw(self.screen)
+		self.bosses.draw(self.screen)
+		self.powerups.draw(self.screen)
+		pygame.draw.rect(self.screen,SEA_BLUE,(0,437,6767,100))
+		self.death_anims.draw(self.screen)
+		pygame.display.update()
+
