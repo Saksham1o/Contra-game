@@ -298,3 +298,113 @@ class Sniper(pygame.sprite.Sprite):
 		self.rect.x = self.defaultx + camera.pos.x
 		self.rect.y = self.defaulty + camera.pos.y
 		pass
+	
+
+    def shoot_towards(self,player):
+		#print(str(player.rect.bottom)+","+str(self.rect.bottom))
+		if player.rect.top < self.rect.top :
+			self.down = True
+			self.up = False
+			self.state = LEFT_DOWN
+		elif player.rect.center[1] > self.rect.bottom :
+			self.up = True
+			self.down = False
+			self.state = LEFT_UP
+		else:
+			self.up,self.down = False,False
+			self.state = LEFT
+		if self.rect.x < PLAYER_POSX + SNIPER_RANGE and self.rect.x > PLAYER_POSX :
+			if self.counter == 0:
+				self.counter = 60
+				return self.shoot(self.up,self.down)
+			else:
+				self.counter -= 1
+				return None
+
+	def shoot(self,up,down):
+		sx = -1
+		if up:
+			sy = 1
+		elif down:
+			sy = -1
+		else:
+			sy = 0
+		b = Bullet(self.rect.left,self.rect.bottom,sx,sy)
+		return b
+
+class Soldier(pygame.sprite.Sprite):
+	def __init__(self,x,y):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.transform.scale(SOLDIER_0,(PLAYER_WIDTH,PLAYER_HEIGHT))
+		self.rect = self.image.get_rect()
+		self.rect.center = (x,y)
+		self.pos = vec(x,y)
+		self.vel = vec(-SOLDIER_SPEEDX,0)
+		self.acc = vec(0,GRAVITY)
+
+		# Animation
+		self.soldier_frames = [SOLDIER_0,SOLDIER_1,SOLDIER_2,SOLDIER_3,SOLDIER_4,SOLDIER_5,SOLDIER_6,SOLDIER_7,SOLDIER_8]
+		self.animIndex = 0
+		self.animCounter = ANIM_SPEED
+
+	def animate(self):
+		self.animCounter -= 1
+		if self.animCounter == 0:
+			self.animIndex +=1
+			self.animIndex %= len(self.soldier_frames)
+			self.image = pygame.transform.scale(self.soldier_frames[self.animIndex],(PLAYER_WIDTH,PLAYER_HEIGHT))
+			self.animCounter = ANIM_SPEED
+		self.image.set_colorkey(YELLOW)
+	def update(self):
+		if self.rect.right < 0:
+			self.kill()
+		self.animate()
+		self.vel += self.acc
+		self.pos += self.vel + 0.5*self.acc	
+		self.rect.x = self.pos.x + camera.pos.x
+		self.rect.bottom = self.pos.y + camera.pos.y
+
+	def shoot_towards(self,player):
+		# Shoot towards the player.
+		pass		
+
+class Tank(pygame.sprite.Sprite):
+	def __init__(self,x,y):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = TANK_0
+		self.rect = self.image.get_rect()
+		self.rect.center = (x,y)
+		self.pos = vec(x,y)
+		self.counter = 60
+
+	def update(self):
+		self.rect.x = self.pos.x + camera.pos.x
+		self.counter -= 1
+		pass
+
+	def shoot(self):
+		if self.rect.x > PLAYER_POSX :
+			if self.counter == 0 or self.counter == 5:
+				if self.counter == 0:
+					self.counter = 60
+				return Bullet(self.rect.x,self.rect.bottom,-1,0)
+		return None
+
+# Bullet
+
+class Bullet(pygame.sprite.Sprite):
+	def __init__(self,x,y,speedx,speedy):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = bulletImage
+		self.rect = self.image.get_rect()
+		self.image.set_colorkey(WHITE)
+		self.rect.left = x
+		self.rect.top = y-50
+		self.speedx = speedx
+		self.speedy = speedy
+
+	def update(self):
+		self.rect.left += self.speedx*BULLET_SPEED
+		self.rect.top += self.speedy*BULLET_SPEED
+		if self.rect.right < 0 or self.rect.left > WIDTH:
+			self.kill()
