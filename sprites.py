@@ -408,3 +408,151 @@ class Bullet(pygame.sprite.Sprite):
 		self.rect.top += self.speedy*BULLET_SPEED
 		if self.rect.right < 0 or self.rect.left > WIDTH:
 			self.kill()
+	
+
+# Platform
+
+class Ground(pygame.sprite.Sprite):
+	def __init__(self,x,y,w,h):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.Surface((w,h))
+		self.image.fill(YELLOW)
+		self.rect = self.image.get_rect()
+		self.rect.left = x
+		self.rect.top = y
+		self.defaultx = x
+		self.defaulty = y
+
+	def update(self):
+		self.rect.x = self.defaultx + camera.pos.x
+		#print("Ground : "+str(self.rect.x))
+		self.rect.y = self.defaulty + camera.pos.y
+
+# Background Sprite
+
+class Background(pygame.sprite.Sprite):
+	def __init__(self,bg):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = bg
+		self.rect = self.image.get_rect()
+		self.rect.left = camera.pos.x
+		self.rect.y = camera.pos.y
+
+	def update(self):
+		self.rect.x = camera.pos.x
+		self.rect.y = camera.pos.y
+
+class HUD(pygame.sprite.Sprite):
+	def __init__(self):
+		pygame.sprite.Sprite.__init__(self)
+		pygame.font.init()
+		self.surface = pygame.Surface((WIDTH,40))
+		self.surface.fill(WHITE)
+		self.image = self.surface
+		self.rect = self.image.get_rect()
+		self.rect.left = 0
+		self.rect.top = 0
+		self.font = pygame.font.SysFont("monospace", 20)
+
+	# Health indicator
+	# Bullets indicator
+	# Powerup indicator
+	# Blink Indicator
+	def update(self):
+		pass
+
+	def update_HUD(self,game):
+		self.surface = pygame.Surface((WIDTH,30))
+		self.surface.fill(LIGHT_YELLOW)
+		self.drawHealth(game.health)
+		self.drawBlink(game.blinkRetract)
+		self.drawPowerup()
+		pass
+
+	def drawHealth(self,health):
+		if health > PLAYER_HEALTH - 5:
+			text = self.font.render("Health: "+str(health), 1,DARK_GREEN)
+		elif health > 10:
+			text = self.font.render("Health: "+str(health), 1,DARK_YELLOW)
+		else:
+			text = self.font.render("Health: "+str(health), 1,RED)
+		textPos = text.get_rect()
+		textPos.centerx = 130
+		self.surface.blit(text,textPos)
+		self.image = self.surface
+
+	def drawBlink(self,retract):
+		retractPerc = str(100 - int(retract/BLINK_RETRACT*100))
+		if retractPerc == '100':
+			retractPerc = "ONLINE"
+			text = self.font.render("Dash: "+retractPerc, 1,DARK_GREEN)
+		else:
+			text = self.font.render("Dash: "+retractPerc, 1,RED)
+		textPos = text.get_rect()
+		textPos.centerx = 410
+		self.surface.blit(text,textPos)
+		self.image = self.surface
+
+	def drawPowerup(self):
+		pass
+
+
+
+
+
+class Powerup(pygame.sprite.Sprite):
+	def __init__(self,x,ptype):
+		pygame.sprite.Sprite.__init__(self)
+		if ptype == 1:
+			self.image = POWERUP_BULLET
+		elif ptype == 0:
+			self.image = POWERUP_BLINK
+		else:
+			self.image = POWERUP_SLOW
+		self.rect = self.image.get_rect()
+		self.image.set_colorkey(BLACK)
+		if x > 6164:
+			x = 6160
+		self.rect.x = x
+		self.defaultx = x
+		self.rect.y = -5
+		
+		self.ptype = ptype
+
+	def update(self):
+		if not self.rect.y >= 170:
+			self.rect.y += POWERUP_SPEED
+
+		self.rect.x = camera.pos.x + self.defaultx
+		if self.rect.x < 0:
+			self.kill()
+
+	def powerup(self):
+		# perform the action of the powerup
+		return self.ptype
+		pass
+
+
+# Death Animation Sprite
+class Death(pygame.sprite.Sprite):
+	def __init__(self,x,y):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = EXPLOSION_0
+		self.rect = self.image.get_rect()
+		self.rect.left = x
+		self.defaultx = x
+		self.rect.top = y 
+		self.time = 0
+		self.image.set_colorkey(WHITE)
+		self.explosionFrames = [EXPLOSION_0,EXPLOSION_1,EXPLOSION_2,EXPLOSION_3,EXPLOSION_4]
+		explosion_sound.play()
+	def update(self):
+		#self.rect.left = self.defaultx + camera.pos.x
+		self.time += 1
+		if self.time == 5:
+			self.kill()
+			return
+		self.image = self.explosionFrames[self.time]
+		self.image.set_colorkey(WHITE)
+		
+		pass
